@@ -14,6 +14,7 @@ namespace EvotixEnvironmentalAssessment
         [TestInitialize]
         public void TestInit()
         {
+            //Initialise browser and login user provider credentials
             Driver.InitialiseBrowser();
             LoginHelper.LoginAsUser(TestUser);
         }
@@ -21,25 +22,42 @@ namespace EvotixEnvironmentalAssessment
         [TestMethod]
         public void Add_And_Delete_New_Record()
         {
-            var testRecordOne = EnvironmentalRecord.TestRecord();
-            var testRecordTwo = EnvironmentalRecord.TestRecord();
+            //Set up record data
+            var testRecordOneDetails = EnvironmentalRecord.TestRecord();
+            var testRecordTwoDetails = EnvironmentalRecord.TestRecord();
 
             AssureHeaderHelper.GoToEnvironAssessmentViaModulesDDL();
 
+            //Add new records
             EnvironmentPage.ClickNewRecordButton();
-            CreateRecordHelper.SetEnvironmentRecordDetailsAndSave(testRecordOne);
+            CreateRecordHelper.SetEnvironmentRecordDetailsAndSave(testRecordOneDetails);
 
             EnvironmentPage.ClickNewRecordButton();
-            CreateRecordHelper.SetEnvironmentRecordDetailsAndSave(testRecordTwo);
+            CreateRecordHelper.SetEnvironmentRecordDetailsAndSave(testRecordTwoDetails);
 
-            //remove comments below
+            //Find newly created records from list
+            var createdRecordOne = EnvironmentPage.GetEnvironmentRecordByDescription(testRecordOneDetails.description);
+            var createdRecordTwo = EnvironmentPage.GetEnvironmentRecordByDescription(testRecordTwoDetails.description);
 
-            //Assert both records are have been added to list
+            //Verify newly created records are present and details are as expected
+            EnvironmentRecordHelper.RecordPresentAndDetailsCorrect(testRecordOneDetails, createdRecordOne);
+            EnvironmentRecordHelper.RecordPresentAndDetailsCorrect(testRecordTwoDetails, createdRecordTwo);
 
-            //Delete record one 
+            //Store pre delete record count
+            var recordCount = EnvironmentPage.EnvironmentRecordCount();
 
-            //Assert record one is not present
-            //Assert record two is still present 
+            //Delete first created record
+            EnvironmentRecordHelper.DeleteRecord(createdRecordOne);
+
+            //Verify first created record is deleted, second created record is still present and count is as expected
+            Assert.IsTrue(EnvironmentPage.EnvironmentRecordCount() == recordCount - 1,
+                "Unexpected number of records after record delete");
+
+            Assert.IsNull(EnvironmentPage.GetEnvironmentRecordByDescription(testRecordOneDetails.description),
+                "CreatedRecordOne is still present in list");
+
+            Assert.IsNotNull(EnvironmentPage.GetEnvironmentRecordByDescription(testRecordTwoDetails.description),
+                "CreatedRecordTwo not present in list");
         }
 
         [TestCleanup]
