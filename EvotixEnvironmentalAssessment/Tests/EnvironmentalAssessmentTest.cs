@@ -32,6 +32,8 @@ namespace EvotixEnvironmentalAssessment
             EnvironmentPage.ClickNewRecordButton();
             CreateRecordHelper.SetEnvironmentRecordDetailsAndSave(testRecordTwo);
 
+            //remove comments below
+
             //Assert both records are have been added to list
 
             //Delete record one 
